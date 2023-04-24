@@ -1,6 +1,4 @@
-use base64::{engine::general_purpose, Engine};
-use ed25519_dalek::PublicKey;
-use helper::helpers::{EasyIdentifier, EdSignature, EdVerifier};
+use helper::{EasyIdentifier, EdSignature, EdVerifier};
 use microledger::{
   block::Block,
   microledger::MicroLedger,
@@ -9,8 +7,9 @@ use microledger::{
 };
 use napi::bindgen_prelude::Buffer;
 use napi_derive::napi;
-mod helper;
 use std::sync::Arc;
+
+mod helper;
 
 #[napi(js_name = "Microledger")]
 struct JsMicroledger {
@@ -21,9 +20,7 @@ struct JsMicroledger {
 impl JsMicroledger {
   #[napi(constructor)]
   pub fn new(pk: String) -> Self {
-    let pk_bytes = general_purpose::STANDARD.decode(pk).expect("Wrong base64");
-    let pk = PublicKey::from_bytes(&pk_bytes).unwrap();
-    let validator = Arc::new(EdVerifier(pk));
+    let validator = Arc::new(EdVerifier::new(&pk));
     let microledger = MicroLedger::new(validator);
     JsMicroledger { micro: microledger }
   }
@@ -41,7 +38,7 @@ impl JsMicroledger {
 
     let mut controlling_ids: Vec<EasyIdentifier> = vec![];
     for _i in identifiers {
-      let id = EasyIdentifier("Identifier1".to_string());
+      let id = EasyIdentifier::default();
 
       controlling_ids.push(id);
     }
@@ -58,7 +55,7 @@ impl JsMicroledger {
   pub fn anchor_block(&mut self, block: String, signature: Buffer) -> napi::Result<String> {
     let block: Block<EasyIdentifier> = serde_json::from_str(&block).unwrap();
 
-    let signature = EdSignature(general_purpose::STANDARD.encode(&signature));
+    let signature = EdSignature::new(&signature);
     let signed_block = block.to_signed_block(vec![signature]);
 
     self.micro.anchor(signed_block.clone()).unwrap();
@@ -67,6 +64,13 @@ impl JsMicroledger {
 
   #[napi]
   pub fn get_blocks(&self) -> napi::Result<Vec<String>> {
-    Ok(self.micro.blocks.iter().map(|block| serde_json::to_string(&block).unwrap()).collect())
+    Ok(
+      self
+        .micro
+        .blocks
+        .iter()
+        .map(|block| serde_json::to_string(&block).unwrap())
+        .collect(),
+    )
   }
 }
