@@ -22,5 +22,11 @@
     "prepublishOnly": "napi prepublish -t npm",
     "test": "ava",
     "version": "napi version"
+  },
+  "dependencies": {
+    "assert": "^2.0.0",
+    "js-base64": "^3.7.2",
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1"
   }
 }

@@ -252,6 +252,6 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { sum } = nativeBinding
+const { Microledger } = nativeBinding
 
-module.exports.sum = sum
+module.exports.Microledger = Microledger

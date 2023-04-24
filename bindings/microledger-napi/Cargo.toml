@@ -8,11 +8,16 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # Default enable napi4 feature, see https://nodejs.org/api/n-api.html#node-api-version-matrix
-napi = { version = "2.3.3", default-features = false, features = ["napi4"] }
-napi-derive = "2.3.3"
+napi = {version = "2"}
+napi-derive = "2"
+microledger = {git = "https://github.com/THCLab/microledger.git"}
+serde = { version = "1.0", features = ["derive"] }
+ed25519-dalek = "1.0.1"
+base64 = "0.21.0"
+serde_json = "1"
 
 [build-dependencies]
-napi-build = "1.2.1"
+napi-build = "2"
 
 [profile.release]
 lto = true
