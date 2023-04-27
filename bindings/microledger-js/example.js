@@ -27,7 +27,7 @@ let second_block = mic.preAnchorBlock(["hello there"], [secondIdentifier])
 console.log("next block: \n" + second_block + "\n")
 let second_signature = nacl.sign.detached(Buffer.from(second_block, 'utf8'), firstKeyPair.secretKey);
 
-let signed_second_block = mic.anchorBlock(second_block, firstIdentifier, Buffer.from(second_signature));
+let signed_second_block = mic.anchorBlock(second_block, firstIdentifier, second_signature);
 console.log("signed next block: \n" + signed_second_block + "\n")
 
 console.log("Microledger blocks: \n" + mic.getBlocks() + "\n")
