@@ -36,10 +36,10 @@ assert.equal(mic.getBlocks().length, 2)
 // This will panic because of wrong signature
 // console.log("-------------- Try to add block with wrong signature -------------------\n")
 // const wrongKeyPair = nacl.sign.keyPair();
-// let next_block = mic.preAnchorBlock(["is it correct?"], [nextKeyB64])
+// let next_block = mic.preAnchorBlock(["is it correct?"], [secondIdentifier])
 // console.log("next block: \n" + next_block + "\n")
 // let wrong_signature = nacl.sign.detached(Buffer.from(second_block, 'utf8'), wrongKeyPair.secretKey);
 
-// let wrong_signature_block = mic.anchorBlock(next_block, Buffer.from(wrong_signature));
+// let wrong_signature_block = mic.anchorBlock(next_block, secondIdentifier, Buffer.from(wrong_signature));
 // console.log("wrongly signed next block: \n" + wrong_signature_block + "\n")
 // console.log("Microledger blocks: \n" + mic.getBlocks() + "\n")

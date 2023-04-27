@@ -1,5 +1,7 @@
-use keri::{prefix::{BasicPrefix, CesrPrimitive}, keys::PublicKey};
-use nontransferable::{NontransferableIdentifier, NontransferableSignature, NontransferableVerifier};
+use keri::{
+  keys::PublicKey,
+  prefix::{BasicPrefix, CesrPrimitive},
+};
 use microledger::{
   block::Block,
   microledger::MicroLedger,
@@ -8,15 +10,18 @@ use microledger::{
 };
 use napi::bindgen_prelude::Buffer;
 use napi_derive::napi;
+use nontransferable::{
+  NontransferableIdentifier, NontransferableSignature, NontransferableVerifier,
+};
 use std::sync::Arc;
 
 mod nontransferable;
 
-  #[napi]
-  pub fn into_identifier(pk: Buffer) -> String {
-    let bp = BasicPrefix::Ed25519NT(PublicKey::new(pk.to_vec()));
-    bp.to_str()
-  }
+#[napi]
+pub fn into_identifier(pk: Buffer) -> String {
+  let bp = BasicPrefix::Ed25519NT(PublicKey::new(pk.to_vec()));
+  bp.to_str()
+}
 
 #[napi(js_name = "Microledger")]
 struct JsMicroledger {
@@ -59,7 +64,12 @@ impl JsMicroledger {
   }
 
   #[napi]
-  pub fn anchor_block(&mut self, block: String, identifier: String, signature: Buffer) -> napi::Result<String> {
+  pub fn anchor_block(
+    &mut self,
+    block: String,
+    identifier: String,
+    signature: Buffer,
+  ) -> napi::Result<String> {
     let block: Block<NontransferableIdentifier> = serde_json::from_str(&block).unwrap();
 
     let signature = NontransferableSignature::new(identifier, signature.to_vec());
