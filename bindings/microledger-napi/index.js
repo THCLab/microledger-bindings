@@ -252,6 +252,7 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { Microledger } = nativeBinding
+const { intoIdentifier, Microledger } = nativeBinding
 
+module.exports.intoIdentifier = intoIdentifier
 module.exports.Microledger = Microledger

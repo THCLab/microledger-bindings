@@ -1,4 +1,5 @@
-use helper::{EasyIdentifier, EdSignature, EdVerifier};
+use keri::{prefix::{BasicPrefix, CesrPrimitive}, keys::PublicKey};
+use nontransferable::{NontransferableIdentifier, NontransferableSignature, NontransferableVerifier};
 use microledger::{
   block::Block,
   microledger::MicroLedger,
@@ -9,18 +10,24 @@ use napi::bindgen_prelude::Buffer;
 use napi_derive::napi;
 use std::sync::Arc;
 
-mod helper;
+mod nontransferable;
+
+  #[napi]
+  pub fn into_identifier(pk: Buffer) -> String {
+    let bp = BasicPrefix::Ed25519NT(PublicKey::new(pk.to_vec()));
+    bp.to_str()
+  }
 
 #[napi(js_name = "Microledger")]
 struct JsMicroledger {
-  micro: MicroLedger<EdSignature, EdVerifier, EasyIdentifier>,
+  micro: MicroLedger<NontransferableSignature, NontransferableVerifier, NontransferableIdentifier>,
 }
 
 #[napi]
 impl JsMicroledger {
   #[napi(constructor)]
-  pub fn new(pk: String) -> Self {
-    let validator = Arc::new(EdVerifier::new(&pk));
+  pub fn new() -> Self {
+    let validator = Arc::new(NontransferableVerifier);
     let microledger = MicroLedger::new(validator);
     JsMicroledger { micro: microledger }
   }
@@ -36,11 +43,11 @@ impl JsMicroledger {
       seal_bundle = seal_bundle.attach(SealData::AttachedData(seal));
     }
 
-    let mut controlling_ids: Vec<EasyIdentifier> = vec![];
-    for _i in identifiers {
-      let id = EasyIdentifier::default();
+    let mut controlling_ids: Vec<NontransferableIdentifier> = vec![];
+    for i in identifiers {
+      let id: BasicPrefix = i.parse().unwrap();
 
-      controlling_ids.push(id);
+      controlling_ids.push(NontransferableIdentifier(id));
     }
     let block = self
       .micro
@@ -52,10 +59,10 @@ impl JsMicroledger {
   }
 
   #[napi]
-  pub fn anchor_block(&mut self, block: String, signature: Buffer) -> napi::Result<String> {
-    let block: Block<EasyIdentifier> = serde_json::from_str(&block).unwrap();
+  pub fn anchor_block(&mut self, block: String, identifier: String, signature: Buffer) -> napi::Result<String> {
+    let block: Block<NontransferableIdentifier> = serde_json::from_str(&block).unwrap();
 
-    let signature = EdSignature::new(&signature);
+    let signature = NontransferableSignature::new(identifier, signature.to_vec());
     let signed_block = block.to_signed_block(vec![signature]);
 
     self.micro.anchor(signed_block.clone()).unwrap();
