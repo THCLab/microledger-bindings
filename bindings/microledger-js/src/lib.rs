@@ -9,7 +9,7 @@ use microledger::{
   seal_bundle::{SealBundle, SealData},
   Encode,
 };
-use napi::bindgen_prelude::Buffer;
+use napi::{bindgen_prelude::Buffer, Error};
 use napi_derive::napi;
 use nontransferable::{
   NontransferableIdentifier, NontransferableSignature, NontransferableVerifier,
@@ -52,17 +52,20 @@ impl JsMicroledger {
 
     let mut controlling_ids: Vec<NontransferableIdentifier> = vec![];
     for i in identifiers {
-      let id: BasicPrefix = i.parse().unwrap();
+      let id: BasicPrefix = i.parse().expect("Can't parse basic prefix");
 
       controlling_ids.push(NontransferableIdentifier(id));
     }
     let block = self
       .micro
       .pre_anchor_block(controlling_ids, &seal_bundle)
-      .unwrap();
-    let block_str = String::from_utf8(block.encode().unwrap()).unwrap();
-
-    Ok(block_str)
+      .map_err(|e| Error::from_reason(e.to_string()))?;
+    String::from_utf8(
+      block
+        .encode()
+        .map_err(|e| Error::from_reason(e.to_string()))?,
+    )
+    .map_err(|e| Error::from_reason(e.to_string()))
   }
 
   #[napi]
@@ -72,24 +75,26 @@ impl JsMicroledger {
     identifier: String,
     signature: Buffer,
   ) -> napi::Result<String> {
-    let block: Block<NontransferableIdentifier> = serde_json::from_str(&block).unwrap();
+    let block: Block<NontransferableIdentifier> =
+      serde_json::from_str(&block).map_err(|e| Error::from_reason(e.to_string()))?;
 
     let signature = NontransferableSignature::new(identifier, signature.to_vec());
     let signed_block = block.to_signed_block(vec![signature]);
 
-    self.micro.anchor(signed_block.clone()).unwrap();
-    Ok(to_cesr_str(&signed_block).unwrap())
+    self
+      .micro
+      .anchor(signed_block.clone())
+      .map_err(|e| Error::from_reason(e.to_string()))?;
+    to_cesr_str(&signed_block).map_err(|e| Error::from_reason(e.to_string()))
   }
 
   #[napi]
   pub fn get_blocks(&self) -> napi::Result<Vec<String>> {
-    Ok(
-      self
-        .micro
-        .blocks
-        .iter()
-        .map(|block| to_cesr_str(block).unwrap())
-        .collect(),
-    )
+    self
+      .micro
+      .blocks
+      .iter()
+      .map(|block| to_cesr_str(block).map_err(|e| Error::from_reason(e.to_string())))
+      .collect()
   }
 }

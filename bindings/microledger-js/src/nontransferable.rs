@@ -26,7 +26,7 @@ impl Signature for NontransferableSignature {
 
 impl NontransferableSignature {
   pub fn new(signer_id: String, signature: Vec<u8>) -> Self {
-    let signer: BasicPrefix = signer_id.parse().unwrap();
+    let signer: BasicPrefix = signer_id.parse().expect("Can't parse signer id");
     let signature = SelfSigningPrefix::Ed25519Sha512(signature);
     NontransferableSignature(Nontransferable::Couplet(vec![(signer, signature)]))
   }

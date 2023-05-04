@@ -32,5 +32,5 @@ Example: `micro.preAnchorBlock(["hello"], ["BFUJZUGPuI7WYheL5fPmHXcZ3G_U8GGnDM3h
 #### `anchorBlock`
 Checks provided block, verify signature and appends it to microledger. It takes block string, signer identifier and signature( as Buffer) as arguments. Currently works only for ed25519 signatures.
 
-#### `getBlocks()`
+#### `getBlocks`
 Returns all appended blocks as a string.
