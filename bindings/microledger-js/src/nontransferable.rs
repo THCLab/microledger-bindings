@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 pub struct NontransferableIdentifier(pub BasicPrefix);
 
 #[derive(Serialize, Clone)]
-pub struct NontransferableSignature(Nontransferable);
+pub struct NontransferableSignature(pub Nontransferable);
 
 impl Identifier for NontransferableIdentifier {}
 

@@ -1,3 +1,4 @@
+use cesr_adapter::to_cesr_str;
 use keri::{
   keys::PublicKey,
   prefix::{BasicPrefix, CesrPrimitive},
@@ -15,6 +16,7 @@ use nontransferable::{
 };
 use std::sync::Arc;
 
+mod cesr_adapter;
 mod nontransferable;
 
 #[napi]
@@ -76,7 +78,7 @@ impl JsMicroledger {
     let signed_block = block.to_signed_block(vec![signature]);
 
     self.micro.anchor(signed_block.clone()).unwrap();
-    Ok(serde_json::to_string(&signed_block).unwrap())
+    Ok(to_cesr_str(&signed_block).unwrap())
   }
 
   #[napi]
@@ -86,7 +88,7 @@ impl JsMicroledger {
         .micro
         .blocks
         .iter()
-        .map(|block| serde_json::to_string(&block).unwrap())
+        .map(|block| to_cesr_str(block).unwrap())
         .collect(),
     )
   }
